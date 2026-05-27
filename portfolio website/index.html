@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rushi Kumar | Portfolio Intro</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;600&display=swap" rel="stylesheet">
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      background: #050a08;
+      background-attachment: fixed;
+      overflow-x: hidden;
+      overflow-y: auto;
+      color: white;
+    }
+    
+    body.loading {
+      overflow: hidden;
+    }
+
+    /* Noise texture overlay */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+      opacity: 0.03;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Subtle Vignette */
+    body::after {
+      content: "";
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      box-shadow: inset 0 0 100px rgba(0, 0, 0, 0.8);
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    /* Full-screen containers */
+    .screen {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 10;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.8s ease-in-out, visibility 0.8s ease-in-out;
+    }
+
+    .screen.active {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    /* SCREEN 1: GREETING */
+    .greeting-text {
+      font-size: 42px;
+      letter-spacing: 12px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.85);
+      text-align: center;
+      text-transform: uppercase;
+      animation: initialFadeIn 1.5s ease-out forwards, floating 5s ease-in-out infinite;
+    }
+
+    /* SCREEN 2: LOADING */
+    .loader-container {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    .loader-container.animate-in {
+      animation: initialFadeIn 1s ease-out forwards, blurToSharp 1.5s ease-out forwards, floating 6s ease-in-out infinite;
+    }
+
+    .percentage {
+      font-weight: 200;
+      font-size: 14px;
+      letter-spacing: 4px;
+      color: rgba(220, 220, 220, 0.5);
+    }
+
+    .main-text {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .line {
+      font-size: 26px;
+      letter-spacing: 6px;
+      line-height: 1.4;
+    }
+
+    .bold-text {
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.95);
+    }
+
+    .light-text {
+      font-weight: 300;
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 20px;
+      letter-spacing: 5px;
+    }
+
+    /* Animations */
+    @keyframes initialFadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes blurToSharp {
+      from { filter: blur(10px); }
+      to { filter: blur(0); }
+    }
+
+    @keyframes floating {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-4px); }
+    }
+
+    .fade-out {
+      opacity: 0 !important;
+      visibility: hidden !important;
+      transform: translateY(-20px);
+      filter: blur(5px);
+      transition: all 0.8s ease-in;
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      .greeting-text {
+        font-size: 28px;
+        letter-spacing: 8px;
+      }
+      .line {
+        font-size: 18px;
+        letter-spacing: 4px;
+      }
+      .light-text {
+        font-size: 14px;
+      }
+      .percentage {
+        font-size: 12px;
+      }
+    }
+
+    /* PORTFOLIO ADVANCED STYLES */
+    .portfolio-container {
+      position: absolute;
+      top: 0; left: 0; width: 100%;
+      opacity: 0; visibility: hidden;
+      transition: opacity 1.5s ease-in-out, visibility 1.5s ease-in-out;
+      z-index: 20;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .portfolio-container.active {
+      opacity: 1; visibility: visible;
+      position: relative; /* flow normally after entrance */
+    }
+
+    .navbar {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 40px 10%;
+    }
+    .logo { font-size: 24px; font-weight: 600; letter-spacing: 2px; }
+    .logo .highlight { color: #00f0ff; }
+    .nav-links { display: flex; gap: 40px; }
+    .nav-links a { color: white; text-decoration: none; font-size: 14px; letter-spacing: 2px; transition: color 0.3s; text-transform: uppercase; font-weight: 300; }
+    .nav-links a:hover { color: #00f0ff; }
+
+    .hero-content-wrapper {
+      display: flex; align-items: center; justify-content: space-between;
+      min-height: 80vh; gap: 50px; padding: 0 10%;
+    }
+
+    .hero-text-area { flex: 1.2; }
+    .greet { font-size: 18px; color: #00f0ff; font-weight: 300; letter-spacing: 4px; margin-bottom: 20px; text-transform: uppercase; }
+    .name { font-size: 64px; font-weight: 700; line-height: 1.1; margin-bottom: 20px; letter-spacing: 1px; }
+    .title { font-size: 22px; font-weight: 300; color: rgba(255,255,255,0.7); margin-bottom: 30px; line-height: 1.5;}
+    .summary { font-size: 16px; color: rgba(255,255,255,0.5); line-height: 1.8; max-width: 550px; margin-bottom: 40px; }
+
+    .cta-buttons { display: flex; gap: 20px; }
+    .btn { padding: 16px 45px; border-radius: 40px; font-size: 14px; font-weight: 600; text-decoration: none; cursor: pointer; transition: all 0.3s; letter-spacing: 2px; text-transform: uppercase;}
+    .btn.primary { background: #00f0ff; color: #000; box-shadow: 0 0 20px rgba(0, 240, 255, 0.3); }
+    .btn.primary:hover { box-shadow: 0 0 40px rgba(0, 240, 255, 0.6); transform: translateY(-3px); }
+    .btn.secondary { background: transparent; color: white; border: 1px solid rgba(255,255,255,0.3); }
+    .btn.secondary:hover { border-color: white; transform: translateY(-3px); background: rgba(255,255,255,0.05); }
+
+    .hero-image-area { flex: 0.8; display: flex; justify-content: center; }
+    .image-wrapper { 
+      position: relative; 
+      width: 400px; height: 500px; 
+      border-radius: 30px;
+      overflow: hidden;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    }
+    .image-wrapper::before {
+      content: ''; position: absolute; top: -2px; left: -2px; right: -2px; bottom: -2px;
+      background: linear-gradient(45deg, #00f0ff, #b026ff, #00f0ff);
+      z-index: -1; border-radius: 32px; filter: blur(20px); opacity: 0.7;
+      animation: gradientShift 5s ease infinite alternate;
+    }
+    @keyframes gradientShift {
+      0% { background-position: 0% 50%; }
+      100% { background-position: 100% 50%; }
+    }
+    .image-wrapper img {
+      width: 100%; height: 100%; object-fit: cover; object-position: top; border-radius: 30px;
+      position: relative; z-index: 1; filter: contrast(1.1) brightness(0.9);
+      transition: filter 0.5s ease;
+    }
+    .image-wrapper:hover img { filter: contrast(1.1) brightness(1.1); }
+
+    /* Content Sections */
+    .section-content { padding: 120px 10%; position: relative; }
+    .section-title {
+      font-size: 36px; font-weight: 700; margin-bottom: 60px;
+      text-transform: uppercase; letter-spacing: 3px; display: inline-block;
+      position: relative;
+    }
+    .section-title span { color: #00f0ff; }
+    .section-title::after {
+      content: ''; position: absolute; left: 0; bottom: -10px; width: 60px; height: 3px;
+      background: #00f0ff; box-shadow: 0 0 10px #00f0ff;
+    }
+
+    /* Skills Grid */
+    .skills-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 30px; }
+    .skill-card {
+      background: rgba(255,255,255,0.02); border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 20px; padding: 40px; backdrop-filter: blur(10px);
+      transition: transform 0.3s, border-color 0.3s;
+      position: relative; overflow: hidden;
+    }
+    .skill-card::before {
+      content:''; position: absolute; top: 0; left: 0; width: 100%; height: 2px;
+      background: linear-gradient(90deg, transparent, #b026ff, transparent); opacity: 0; transition: opacity 0.3s;
+    }
+    .skill-card:hover { transform: translateY(-10px); border-color: rgba(176,38,255,0.3); }
+    .skill-card:hover::before { opacity: 1; }
+    .skill-icon { font-size: 24px; margin-bottom: 20px; color: #b026ff; letter-spacing: 2px; text-transform: uppercase; font-weight: 600;}
+    .skill-list { list-style: none; }
+    .skill-list li { color: rgba(255,255,255,0.7); margin-bottom: 12px; font-weight: 300; display: flex; align-items: center; gap: 10px; font-size: 15px;}
+    .skill-list li::before { content: '▹'; color: #00f0ff; font-size: 18px; }
+
+    /* Projects */
+    .projects-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(350px, 100%), 1fr)); gap: 40px; }
+    .project-card {
+      background: rgba(255,255,255,0.02); border-radius: 20px; overflow: hidden;
+      border: 1px solid rgba(255,255,255,0.05); transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      position: relative;
+    }
+    .project-card:hover { border-color: rgba(0,240,255,0.4); transform: scale(1.02); box-shadow: 0 15px 40px rgba(0,240,255,0.1); }
+    .project-content { padding: 40px; }
+    .project-title { font-size: 22px; font-weight: 600; margin-bottom: 15px; letter-spacing: 1px; }
+    .project-desc { color: rgba(255,255,255,0.6); font-weight: 300; line-height: 1.6; margin-bottom: 25px; font-size: 15px;}
+    .project-tags { display: flex; gap: 10px; flex-wrap: wrap; }
+    .tag { background: rgba(0,240,255,0.05); color: #00f0ff; padding: 6px 16px; border-radius: 20px; font-size: 12px; border: 1px solid rgba(0,240,255,0.1); letter-spacing: 1px;}
+
+    /* Education */
+    .edu-timeline { border-left: 2px solid rgba(255,255,255,0.1); padding-left: 40px; margin-left: 20px;}
+    .edu-item { position: relative; margin-bottom: 50px; }
+    .edu-item:last-child { margin-bottom: 0; }
+    .edu-item::before {
+      content: ''; position: absolute; left: -47px; top: 0; width: 12px; height: 12px;
+      background: #00f0ff; border-radius: 50%; box-shadow: 0 0 15px #00f0ff;
+    }
+    .edu-year { color: #b026ff; font-weight: 600; font-size: 14px; letter-spacing: 2px; margin-bottom: 10px; text-transform: uppercase;}
+    .edu-title { font-size: 20px; font-weight: 600; margin-bottom: 8px; letter-spacing: 1px;}
+    .edu-school { color: rgba(255,255,255,0.6); font-weight: 300; font-size: 15px;}
+
+    /* Footer */
+    .footer { padding: 60px 10%; border-top: 1px solid rgba(255,255,255,0.05); display: flex; justify-content: space-between; align-items: center; color: rgba(255,255,255,0.4); font-size: 14px;}
+    .social-links { display: flex; gap: 30px; }
+    .social-links a { color: rgba(255,255,255,0.4); text-decoration: none; transition: color 0.3s; letter-spacing: 1px;}
+    .social-links a:hover { color: #00f0ff; }
+
+    @media (max-width: 900px) {
+      .hero-content-wrapper { flex-direction: column-reverse; text-align: center; margin-top: 40px;}
+      .name { font-size: 44px; }
+      .cta-buttons { justify-content: center; }
+      .nav-links { display: none; }
+      .image-wrapper { width: 300px; height: 380px; }
+      .footer { flex-direction: column; gap: 20px; text-align: center; }
+    }
+  </style>
+</head>
+
+<body class="loading">
+  <!-- SCREEN 1: GREETING -->
+  <div class="screen active" id="greeting-screen">
+    <div class="greeting-text">NAMASTHE</div>
+  </div>
+
+  <!-- SCREEN 2: LOADING -->
+  <div class="screen" id="loading-screen">
+    <div class="loader-container" id="loader-content">
+      <div class="percentage" id="percent-text">0%</div>
+      <div class="main-text">
+        <div class="line bold-text">DESIGNED. CODED.</div>
+        <div class="line">
+          <span class="bold-text">LOVED. </span>
+          <span class="light-text">BY RUSHI KUMAR.</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FULL PORTFOLIO (Appears after loader) -->
+  <section class="portfolio-container" id="hero-section">
+    <!-- Navbar -->
+    <nav class="navbar">
+      <div class="logo">RUSHI KUMAR<span class="highlight">.</span></div>
+      <div class="nav-links">
+        <a href="#hero-section">About</a>
+        <a href="#skills">Skills</a>
+        <a href="#projects">Projects</a>
+        <a href="#contact">Contact</a>
+      </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <div class="hero-content-wrapper" id="about">
+      <div class="hero-text-area">
+        <h3 class="greet">Greetings, I am</h3>
+        <h1 class="name">Mekala Rushi Kumar</h1>
+        <h2 class="title">Generative AI, Prompt Engineering & Python Automation Specialist</h2>
+        <p class="summary">
+          Experienced in building AI-powered chatbots, optimizing prompts for LLM workflows, and creating AI-driven web solutions. Strong analytical thinker with hands-on experience in real-world AI applications.
+        </p>
+        <div class="cta-buttons">
+          <a href="#projects" class="btn primary">View Projects</a>
+          <a href="#contact" class="btn secondary">Get In Touch</a>
+        </div>
+      </div>
+      <div class="hero-image-area">
+        <div class="image-wrapper">
+          <!-- User Profile Image -->
+          <img src="profile.jpeg" alt="Mekala Rushi Kumar" onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1549692520-acc6669e2f0c?w=600&auto=format&fit=crop';"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- Skills Section -->
+    <div class="section-content" id="skills">
+      <h2 class="section-title">Technical <span>Skills</span></h2>
+      <div class="skills-grid">
+        <div class="skill-card">
+          <div class="skill-icon">Generative AI</div>
+          <ul class="skill-list">
+            <li>Prompt Engineering</li>
+            <li>LLM Workflows</li>
+            <li>AI Tools Integration</li>
+            <li>n8n Workflows & Agentic AI</li>
+          </ul>
+        </div>
+        <div class="skill-card">
+          <div class="skill-icon">AI / ML</div>
+          <ul class="skill-list">
+            <li>Machine Learning</li>
+            <li>NLP Basics</li>
+            <li>Model Evaluation</li>
+            <li>Data Analysis</li>
+          </ul>
+        </div>
+        <div class="skill-card">
+          <div class="skill-icon">Development</div>
+          <ul class="skill-list">
+            <li>Python</li>
+            <li>SQL</li>
+            <li>Git</li>
+            <li>Jupyter Notebook</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Projects Section -->
+    <div class="section-content" id="projects">
+      <h2 class="section-title">Featured <span>Projects</span></h2>
+      <div class="projects-grid">
+        <div class="project-card">
+          <div class="project-content">
+            <h3 class="project-title">n8n Automations, Chatbots & Agentic AI</h3>
+            <p class="project-desc">Built workflow automations and AI chatbots in n8n, integrating agentic AI logic for smarter task execution.</p>
+            <div class="project-tags">
+              <span class="tag">n8n</span>
+              <span class="tag">Agentic AI</span>
+            </div>
+          </div>
+        </div>
+        <div class="project-card">
+          <div class="project-content">
+            <h3 class="project-title">AI Website Creation</h3>
+            <p class="project-desc">Designed and developed responsive portfolio websites using AI tools with modern UI/UX and automation-based workflows.</p>
+            <div class="project-tags">
+              <span class="tag">Web Dev</span>
+              <span class="tag">UI/UX</span>
+            </div>
+          </div>
+        </div>
+        <div class="project-card">
+          <div class="project-content">
+            <h3 class="project-title">AI Application Development</h3>
+            <p class="project-desc">Built applications using Codex, Antigravity, Claude Code, and hands-on LLM tools like ChatGPT, Claude, Gemini, and Kimi K2.6.</p>
+            <div class="project-tags">
+              <span class="tag">Codex</span>
+              <span class="tag">LLM Tools</span>
+            </div>
+          </div>
+        </div>
+        <div class="project-card">
+          <div class="project-content">
+            <h3 class="project-title">Multi Disease Prediction System</h3>
+            <p class="project-desc">Built a machine learning system using Random Forest to predict multiple diseases from patient health inputs.</p>
+            <div class="project-tags">
+              <span class="tag">Machine Learning</span>
+              <span class="tag">Random Forest</span>
+            </div>
+          </div>
+        </div>
+        <div class="project-card">
+          <div class="project-content">
+            <h3 class="project-title">AI Images & AI Ads</h3>
+            <p class="project-desc">Created AI images and AI ad creatives using Seedance and Nano Banana Pro for polished campaign visuals and brand-ready assets.</p>
+            <div class="project-tags">
+              <span class="tag">Seedance</span>
+              <span class="tag">Nano Banana Pro</span>
+              <span class="tag">AI Ads</span>
+            </div>
+          </div>
+        </div>
+        <div class="project-card">
+          <div class="project-content">
+            <h3 class="project-title">Environment & DevOps</h3>
+            <p class="project-desc">Set up Docker deployment flows, local server hosting, Git/GitHub workflows, Google Sheets API integrations, and spreadsheet-backed data layers.</p>
+            <div class="project-tags">
+              <span class="tag">Docker</span>
+              <span class="tag">GitHub</span>
+              <span class="tag">Google Sheets API</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Education & Certifications -->
+    <div class="section-content" style="display:flex; flex-wrap:wrap; gap:50px;">
+      <div style="flex:1; min-width:300px;">
+        <h2 class="section-title">Education</h2>
+        <div class="edu-timeline">
+          <div class="edu-item">
+            <div class="edu-year">2023 - 2026</div>
+            <div class="edu-title">B.Tech, Computer Science Engineering</div>
+            <div class="edu-school">N.B.K.R IST | CGPA: 6.87</div>
+          </div>
+          <div class="edu-item">
+            <div class="edu-year">2021 - 2023</div>
+            <div class="edu-title">Diploma, Electrical & Electronics Eng.</div>
+            <div class="edu-school">Govt Polytechnic, Nellore | 65.48%</div>
+          </div>
+        </div>
+      </div>
+      <div style="flex:1; min-width:300px;">
+        <h2 class="section-title">Certifications</h2>
+        <div class="edu-timeline">
+          <div class="edu-item">
+            <div class="edu-year">IBM SkillsBuild</div>
+            <div class="edu-title">AI Fundamentals</div>
+          </div>
+          <div class="edu-item">
+            <div class="edu-year">Anthropic</div>
+            <div class="edu-title">Claude AI & LLM Workflows</div>
+          </div>
+          <div class="edu-item">
+            <div class="edu-year">Outskill</div>
+            <div class="edu-title">Generative AI</div>
+          </div>
+          <div class="edu-item">
+            <div class="edu-year">Deeksha Technologies</div>
+            <div class="edu-title">Web Development Internship</div>
+          </div>
+          <div class="edu-item">
+            <div class="edu-year">NCC</div>
+            <div class="edu-title">"B" Certificate</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer" id="contact">
+      <div>&copy; 2026 Mekala Rushi Kumar. All Rights Reserved.</div>
+      <div class="social-links">
+        <a href="mailto:rushimekala123@gmail.com">rushimekala123@gmail.com</a>
+        <a href="tel:+918978589336">+91 8978589336</a>
+        <a href="https://linkedin.com/in/rushi-kumar-b102a8370" target="_blank">LinkedIn</a>
+        <a href="https://github.com/Rushikumar-512" target="_blank">GitHub</a>
+      </div>
+    </footer>
+  </section>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const greetingScreen = document.getElementById("greeting-screen");
+      const loadingScreen = document.getElementById("loading-screen");
+      const loaderContent = document.getElementById("loader-content");
+      const percentText = document.getElementById("percent-text");
+      
+      // Timing configuration (ms)
+      const GREETING_DURATION = 2500;
+      const TRANSITION_DELAY = 800; // time between screens
+      const LOADING_DURATION = 2500;
+      
+      // Sequence Logic
+      setTimeout(() => {
+        // Fade out greeting
+        greetingScreen.classList.remove("active");
+        greetingScreen.classList.add("fade-out");
+        
+        // After transition delay, show loading screen
+        setTimeout(() => {
+          loadingScreen.classList.remove("fade-out"); // Clean up if needed
+          loadingScreen.classList.add("active");
+          loaderContent.classList.add("animate-in");
+          startLoading();
+        }, TRANSITION_DELAY);
+        
+      }, GREETING_DURATION);
+
+      function startLoading() {
+        let currentProgress = 0;
+        const targetProgress = 100;
+        const frameRate = 1000 / 60; // 60fps
+        const totalFrames = LOADING_DURATION / frameRate;
+        const progressIncrement = targetProgress / totalFrames;
+
+        const incrementProgress = setInterval(() => {
+          currentProgress += progressIncrement;
+          if (currentProgress >= targetProgress) {
+            currentProgress = targetProgress;
+            clearInterval(incrementProgress);
+            
+            // Trigger final fade out after loading is done
+            setTimeout(() => {
+              loadingScreen.classList.remove("active");
+              loadingScreen.classList.add("fade-out");
+              
+              setTimeout(() => { 
+                const heroSection = document.getElementById("hero-section");
+                if (heroSection) heroSection.classList.add("active");
+                document.body.classList.remove("loading");
+              }, 800);
+            }, 600);
+          }
+          percentText.innerText = Math.floor(currentProgress) + "%";
+        }, frameRate);
+      }
+    });
+  </script>
+</body>
+</html>
